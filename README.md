@@ -23,6 +23,6 @@ Event fields: tenant_id, seq, event_id, ts, type, actor, correlation_id, causati
 `python3 -m atl key rotate` creates a new master version and appends `key.rotated {master_version}` to every tenant ledger; events are MACed under the version in force before them, principals and anchors record the version they were issued under, so old data verifies as long as old master versions stay retrievable.
 
 ## Other
-`bakeoff/suite.py`: shared tamper suite for ledger comparison (ATL adapter included; POM/SAL adapters must be supplied). `Dockerfile`, `Dockerfile.executor`, `docker-compose.yml`; CI in `../.github/workflows/atl.yml` (verify + CycloneDX SBOM).
+`bakeoff/suite.py`: shared tamper suite for ledger comparison (ATL adapter included; POM/SAL adapters must be supplied). `Dockerfile`, `Dockerfile.executor`, `docker-compose.yml`; CI in `.github/workflows/ci.yml` (verify + CycloneDX SBOM).
 
 Known limits: SQLite single writer; DB-backed single-node rate limits; Python policy evaluator (OPA not used); Docker mode needs host daemon access, so the compose gateway uses the subprocess worker inside a locked-down container; HashiCorp Vault and AWS KMS providers are tested against mocks only.
