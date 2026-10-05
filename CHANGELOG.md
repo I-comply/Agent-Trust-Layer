@@ -1,0 +1,42 @@
+# Changelog
+
+## v0.1.0 — 2026-10-05
+
+First standalone release. Split out of the `phantom-runtime` monorepo into
+its own repository with full commit history preserved.
+
+### Core
+- Identity → capability policy → authorization (+ separate approver,
+  single-use, TTL-bound) → sandboxed execution → per-tenant hash-chained,
+  HMAC'd ledger → evidence → external anchor → offline verifier.
+- Sandboxed execution: subprocess driver (rlimited, unprivileged) and a
+  Docker driver (`--network none --read-only --cap-drop ALL
+  --no-new-privileges --pids-limit 64 --memory 256m --cpus 1
+  --user 65534:65534`, pinned-digest image, fail-closed, no fallback).
+- `KeyProvider` abstraction: file, env, aws-kms, and vault backends; no
+  plaintext key on disk outside file mode; versioned key rotation that
+  keeps old ledger entries verifiable.
+
+### Verified
+- `./verify.sh`: 27 tests + demo, green.
+- Agent test harness (`harness.run_agents`): 744 scripted requests across 24
+  agents, 100% matched expectation after the availability fix in
+  `reports/REPORT.md`; both subprocess and Docker executors.
+- Live adversarial trial with real Claude subagents (not scripted): zero
+  successful privilege escalations, zero unapproved destructive actions
+  across an embedded prompt-injection attack, ledger independently verified
+  clean (`reports/REPORT.md` §6).
+- Security scan: bandit 0 High/Medium after fixes; no tracked secrets;
+  `pip-audit` has nothing to audit (stdlib only).
+
+### Known limits
+- SQLite single writer; DB-backed single-node rate limits; Python policy
+  evaluator (OPA not used).
+- Ledger bake-off vs. POM/SAL ledgers not run — adapters for those ledgers
+  were never supplied.
+- Vault and AWS KMS key providers are tested against mocks only.
+
+### Packaging
+- CI: `.github/workflows/ci.yml` (verify + Docker-executor tests across
+  Python 3.9/3.12, bandit, CycloneDX SBOM for both source and container
+  image).
