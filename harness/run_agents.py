@@ -116,7 +116,7 @@ def main():
     core.db.conn().execute("UPDATE events SET payload='{\"x\":1}' WHERE tenant_id=? AND seq=3", (tenants[0],))
     tamper = core.verify_all(tenants[0])
     events = {t: len(core.ledger.events(t, 10 ** 9)) for t in tenants if t != tenants[0]}
-    srv.shutdown()
+    srv.shutdown(); srv.server_close()
     out = Path(a.out); out.mkdir(exist_ok=True)
     summary = {"executor": a.executor, "tenants": a.tenants, "agents_per_tenant": a.agents,
                "agent_instances": len(jobs), "requests": len(recs), "wall_s": round(wall, 2),
