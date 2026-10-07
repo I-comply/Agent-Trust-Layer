@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased (0.2)
+
+Each item was reproduced by running the code before it was fixed.
+
+- Idempotent requests whose process died no longer stay `409 in_progress` forever: after
+  `limits.idem_lease_s` they are reconciled from the ledger (never re-executed) and answered with the
+  recorded outcome or `409 abandoned` (`executed: no|unknown`); a `tool.abandoned` event is recorded.
+- `verify --chain-only` states that it checks structure only; `--anchors FILE` checks the ledger against
+  anchors held outside the data dir. `ATL_ANCHOR_FILE` moves the anchor file; the webhook result is
+  recorded as an `anchor.published` event.
+- `atl erase` / `POST /v1/admin/erase` delete one evidence blob and record an `evidence.erased`
+  tombstone; verification accepts tombstoned blobs.
+- Policy: per-param `enum`, `pattern`, `min`/`max`; per-tool `rate_per_minute`. Invalid constraints
+  refuse to start.
+- Admin ledger reads are recorded as `admin.read` events.
+
 ## v0.1.0 — 2026-10-05
 
 First standalone release. Split out of the `phantom-runtime` monorepo into
