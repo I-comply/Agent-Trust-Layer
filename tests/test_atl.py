@@ -280,7 +280,7 @@ class TestHTTP(Base):
         self.assertEqual(post("/v1/admin/anchor", {"tenant_id": T})[0], 401)
         self.assertEqual(post("/v1/admin/anchor", {"tenant_id": T}, {"X-ATL-Admin": "tok"})[0], 200)
         self.assertEqual(post("/v1/invoke", {"junk": 1})[0], 400)
-        srv.shutdown()
+        srv.shutdown(); srv.server_close()
 
 
 if __name__ == "__main__":

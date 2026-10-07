@@ -107,7 +107,10 @@ def main(argv=None):
         anchors = []
         if a.anchors:
             anchors = [json.loads(l) for l in Path(a.anchors).read_text().splitlines() if l.strip()]
-        r = dict(verify_conn(conn, a.tenant, None, anchors))
+        try:
+            r = dict(verify_conn(conn, a.tenant, None, anchors))
+        finally:
+            conn.close()
         if anchors:
             r["assurance"] = "structure_and_anchors"
         else:
