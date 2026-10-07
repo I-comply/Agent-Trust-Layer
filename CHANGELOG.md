@@ -15,6 +15,9 @@ Each item was reproduced by running the code before it was fixed.
 - Policy: per-param `enum`, `pattern`, `min`/`max`; per-tool `rate_per_minute`. Invalid constraints
   refuse to start.
 - Admin ledger reads are recorded as `admin.read` events.
+- Append cost no longer grows with ledger size (partial index for the key-rotation lookup); `verify` and
+  `erase` stream the ledger. `atl anchor --all`, `atl serve --anchor-every` / `ATL_ANCHOR_EVERY_S` narrow the
+  window in which tail truncation is undetectable. Opt-in `limits.per_agent_sandbox`. Dot-only ids rejected.
 
 ## v0.1.0 — 2026-10-05
 
