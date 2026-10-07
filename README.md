@@ -36,6 +36,8 @@ Event fields: tenant_id, seq, event_id, ts, type, actor, correlation_id, causati
 
 ## Audit sidecar
 `atl/sidecar.py`: `Sidecar(core.ledger, core.evidence, tenant)`; `install_http()` records every `http.client`/urllib call, `wrap_db(conn)` records DB-API statements and commit/rollback. Write-ahead and fail-closed (`audit.<http|db>.intent` is committed before the call; failure to record blocks it), then `audit.<kind>.result` with `causation_id`. Stores hashes/metadata only (no header values, query strings or params); `store_bodies=True` also puts raw bodies/statements in evidence. In-process only: does not see code that bypasses these libraries, and HTTP response digests cover bytes read via `read()`.
+## ZK identity assertion
+`atl/zkid.py` + `atl/groth16.py`: Groth16 (BN254) proof that a registered credential commitment `C = mimc(secret, mimc(permission_mask, salt))` permits tool T, bound to a single-use verifier nonce, tenant, agent and tool. Private: principal secret, permission mask, `salt` = digest(session config, env/tool tokens). Public: C, tool selector, challenge. Optional dependency `pip install py_ecc` (tests skip without it). Full-size circuit: 830 constraints, ~25 s setup, ~25 s prove, ~1 s verify (pure Python). Single-party trusted setup; use a multi-party ceremony and a native prover for production. Not yet wired into the gateway.
 
 ## Other
 `bakeoff/suite.py`: shared tamper suite for ledger comparison (ATL adapter included; POM/SAL adapters must be supplied). `Dockerfile`, `Dockerfile.executor`, `docker-compose.yml`; CI in `.github/workflows/ci.yml` (verify + CycloneDX SBOM).
