@@ -42,7 +42,7 @@ class ATLAdapter:
         db = self.c.db.conn()
         db.executescript("DROP TRIGGER IF EXISTS events_no_update; DROP TRIGGER IF EXISTS events_no_delete;")
         if kind == "modify":
-            db.execute("UPDATE events SET payload='{\"x\":1}' WHERE tenant_id=? AND seq=2", (tenant,))
+            db.execute("UPDATE events SET payload='{\"x\":1}' WHERE tenant_id=? AND seq=2", (tenant,))  # nosem: phantom.python.sql-string-building -- intentional tamper simulation; literal SQL, no interpolation
         elif kind == "delete_middle":
             db.execute("DELETE FROM events WHERE tenant_id=? AND seq=2", (tenant,))
         elif kind == "truncate_tail":
