@@ -113,7 +113,7 @@ def main():
     anchor = core.anchor(tenants[0])
     # tamper detection
     core.db.conn().executescript("DROP TRIGGER events_no_update;")
-    core.db.conn().execute("UPDATE events SET payload='{\"x\":1}' WHERE tenant_id=? AND seq=3", (tenants[0],))
+    core.db.conn().execute("UPDATE events SET payload='{\"x\":1}' WHERE tenant_id=? AND seq=3", (tenants[0],))  # nosem: phantom.python.sql-string-building -- intentional tamper simulation; literal SQL, no interpolation
     tamper = core.verify_all(tenants[0])
     events = {t: len(core.ledger.events(t, 10 ** 9)) for t in tenants if t != tenants[0]}
     srv.shutdown()
