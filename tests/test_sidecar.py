@@ -44,7 +44,7 @@ class TestSidecar(unittest.TestCase):
         req = urllib.request.Request(f"http://127.0.0.1:{srv.server_port}/x?token=SECRET", data=b"hello",
                                      headers={"Authorization": "Bearer SECRET"})
         self.assertEqual(urllib.request.urlopen(req).read(), b"pong")
-        srv.shutdown()
+        srv.shutdown(); srv.server_close()
         ev = self.types()
         self.assertEqual([e["type"] for e in ev], ["audit.http.intent", "audit.http.result"])
         self.assertEqual(ev[0]["payload"]["body_sha256"], sha256(b"hello"))
@@ -60,7 +60,8 @@ class TestSidecar(unittest.TestCase):
             urllib.request.urlopen("http://127.0.0.1:9/x", timeout=1)  # never reaches the network
 
     def test_db_recorded_and_params_hashed(self):
-        db = self.sc.wrap_db(sqlite3.connect(":memory:"))
+        raw = sqlite3.connect(":memory:"); self.addCleanup(raw.close)
+        db = self.sc.wrap_db(raw)
         db.execute("CREATE TABLE t(a)")
         db.execute("INSERT INTO t VALUES(?)", ("pii-value",))
         db.commit()
@@ -72,14 +73,16 @@ class TestSidecar(unittest.TestCase):
         self.assertTrue(self.c.verify_all(T)["ok"])
 
     def test_db_error_recorded_and_reraised(self):
-        db = self.sc.wrap_db(sqlite3.connect(":memory:"))
+        raw = sqlite3.connect(":memory:"); self.addCleanup(raw.close)
+        db = self.sc.wrap_db(raw)
         with self.assertRaises(sqlite3.OperationalError):
             db.execute("SELECT * FROM nope")
         self.assertEqual(self.types()[-1]["payload"], {"error": "OperationalError"})
 
     def test_store_bodies(self):
         sc = Sidecar(self.c.ledger, self.c.evidence, T, store_bodies=True)
-        db = sc.wrap_db(sqlite3.connect(":memory:"))
+        raw = sqlite3.connect(":memory:"); self.addCleanup(raw.close)
+        db = sc.wrap_db(raw)
         db.execute("SELECT 1")
         h = self.types()[0]["evidence"][0]
         self.assertEqual(self.c.evidence.get(T, h), b"SELECT 1")

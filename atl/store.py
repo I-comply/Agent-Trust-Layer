@@ -1,4 +1,4 @@
-import sqlite3, threading
+import sqlite3, threading, weakref
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS tenants(tenant_id TEXT PRIMARY KEY, created INTEGER NOT NULL);
@@ -46,6 +46,9 @@ class DB:
     def __init__(self, path):
         self.path = str(path)
         self._l = threading.local()
+        self._all = []
+        self._all_lock = threading.Lock()
+        weakref.finalize(self, DB._close_all, self._all)
         c = self.conn()
         c.executescript(SCHEMA)
         if "master_version" not in [r["name"] for r in c.execute("PRAGMA table_info(principals)")]:
@@ -53,13 +56,28 @@ class DB:
         if "started" not in [r["name"] for r in c.execute("PRAGMA table_info(requests)")]:
             c.execute("ALTER TABLE requests ADD COLUMN started INTEGER NOT NULL DEFAULT 0")
 
+    @staticmethod
+    def _close_all(conns):
+        for c in conns:
+            try:
+                c.close()
+            except Exception:
+                pass
+        conns.clear()
+
+    def close(self):
+        self._close_all(self._all)
+        self._l = threading.local()
+
     def conn(self):
         c = getattr(self._l, "c", None)
         if c is None:
-            c = sqlite3.connect(self.path, timeout=10, isolation_level=None)
+            c = sqlite3.connect(self.path, timeout=10, isolation_level=None, check_same_thread=False)
             c.row_factory = sqlite3.Row
             c.execute("PRAGMA journal_mode=WAL")
             c.execute("PRAGMA foreign_keys=ON")
             c.execute("PRAGMA busy_timeout=10000")
+            with self._all_lock:
+                self._all.append(c)
             self._l.c = c
         return c
