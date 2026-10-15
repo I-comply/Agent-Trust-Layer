@@ -48,7 +48,7 @@ def demo():
     c.anchor(T)
     print("verify:", c.verify_all(T))
     c.db.conn().executescript("DROP TRIGGER events_no_update;")
-    c.db.conn().execute("UPDATE events SET payload='{\"tampered\":1}' WHERE tenant_id='acme' AND seq=3")
+    c.db.conn().execute("UPDATE events SET payload='{\"tampered\":1}' WHERE tenant_id='acme' AND seq=3")  # nosem: phantom.python.sql-string-building -- intentional tamper simulation; literal SQL, no interpolation
     print("after tamper:", c.verify_all(T))
     shutil.rmtree(d, ignore_errors=True)
 

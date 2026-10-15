@@ -109,7 +109,7 @@ class Node:
             c = sqlite3.connect(self.path, isolation_level=None, check_same_thread=False)
             c.row_factory = sqlite3.Row
             if self.role == "leader":
-                c.execute(f"PRAGMA page_size={self.page_size}")
+                c.execute(f"PRAGMA page_size={int(self.page_size)}")  # nosem: phantom.python.sql-string-building -- page_size coerced to int
             c.execute("PRAGMA journal_mode=WAL")
             self._conn = c
         return self._conn

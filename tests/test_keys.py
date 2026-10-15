@@ -124,7 +124,7 @@ class Rotation(unittest.TestCase):
         self.c.rotate_master(); self.inv(self.old)
         conn = self.c.db.conn()
         conn.executescript("DROP TRIGGER events_no_update;")
-        conn.execute("UPDATE events SET payload='{\"x\":1}' WHERE tenant_id=? AND seq=2", (T,))
+        conn.execute("UPDATE events SET payload='{\"x\":1}' WHERE tenant_id=? AND seq=2", (T,))  # nosem: phantom.python.sql-string-building -- intentional tamper simulation; literal SQL, no interpolation
         r = self.c.verify_all(T)
         self.assertFalse(r["ok"])
 
@@ -153,7 +153,7 @@ class Rotation(unittest.TestCase):
         ok = subprocess.run([sys.executable, "-m", "atl", "--dir", str(self.d), "verify", T], env=env, capture_output=True)
         self.assertEqual(ok.returncode, 0, ok.stderr)
         conn = self.c.db.conn(); conn.executescript("DROP TRIGGER events_no_update;")
-        conn.execute("UPDATE events SET payload='{\"x\":1}' WHERE tenant_id=? AND seq=2", (T,))
+        conn.execute("UPDATE events SET payload='{\"x\":1}' WHERE tenant_id=? AND seq=2", (T,))  # nosem: phantom.python.sql-string-building -- intentional tamper simulation; literal SQL, no interpolation
         bad = subprocess.run([sys.executable, "-m", "atl", "--dir", str(self.d), "verify", T], env=env, capture_output=True)
         self.assertEqual(bad.returncode, 1)
         bad = subprocess.run([sys.executable, "-m", "atl", "--dir", str(self.d), "verify", T, "--chain-only"], env=env, capture_output=True)

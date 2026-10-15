@@ -43,3 +43,9 @@ Event fields: tenant_id, seq, event_id, ts, type, actor, correlation_id, causati
 `bakeoff/suite.py`: shared tamper suite for ledger comparison (ATL adapter included; POM/SAL adapters must be supplied). `Dockerfile`, `Dockerfile.executor`, `docker-compose.yml`; CI in `.github/workflows/ci.yml` (verify + CycloneDX SBOM).
 
 Known limits: SQLite single writer; DB-backed single-node rate limits; Python policy evaluator (OPA not used); Docker mode needs host daemon access, so the compose gateway uses the subprocess worker inside a locked-down container; HashiCorp Vault and AWS KMS providers are tested against mocks only.
+
+
+---
+
+© 2026 Daniel Ron Stevens. All Rights Reserved.
+PhantomWorks™️
