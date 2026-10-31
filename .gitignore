@@ -1,3 +1,18 @@
 atl-data/
 __pycache__/
 *.pyc
+
+# added: secrets, dependencies, build output
+.env
+.env.*
+!.env.example
+node_modules/
+.venv/
+venv/
+dist/
+build/
+*.pem
+*.key
+*.p12
+*.log
+.DS_Store
