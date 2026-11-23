@@ -1,5 +1,5 @@
 # Gateway image. Base pinned by digest (python:3.12-slim). Runs as non-root; no Docker socket needed.
-FROM python@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d
+FROM python@sha256:46837ed3105db0029b6d656816185c6258e3b39690532fb782428e0a5fd76182
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 ATL_DIR=/data ATL_EXECUTOR=subprocess
 WORKDIR /app
 COPY atl/ ./atl/
